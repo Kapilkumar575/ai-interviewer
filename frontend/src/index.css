@@ -1,0 +1,116 @@
+/* Tailwind Base */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* GLOBAL */
+body {
+  @apply bg-gray-50;
+}
+
+/* ======================
+   🔷 GLASS UI COMPONENTS
+====================== */
+.glass-card {
+  background: rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(14px);
+  border-radius: 20px;
+  padding: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  transition: all 0.2s ease;
+}
+
+/* ======================
+   🔷 INPUT SYSTEM
+====================== */
+.input {
+  width: 100%;
+  padding: 12px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.08);
+  border: none;
+  color: white;
+  transition: 0.2s;
+}
+
+.input:focus {
+  outline: none;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.input-disabled {
+  width: 100%;
+  padding: 12px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  color: gray;
+}
+
+/* ======================
+   🔷 PREMIUM INPUT (LIGHT UI)
+====================== */
+.premium-input {
+  width: 100%;
+  padding: 12px;
+  border-radius: 12px;
+  background: #f8fafc;
+  border: 2px solid transparent;
+  font-weight: 600;
+  transition: 0.2s;
+}
+
+.premium-input:focus {
+  background: white;
+  border-color: #14b8a6;
+  box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.1);
+}
+
+.premium-disabled {
+  width: 100%;
+  padding: 12px;
+  border-radius: 12px;
+  background: #e2e8f0;
+  color: #64748b;
+}
+
+/* ======================
+   🔷 BUTTON SYSTEM
+====================== */
+.primary-btn {
+  background: linear-gradient(to right, #14b8a6, #06b6d4);
+  padding: 12px;
+  border-radius: 12px;
+  font-weight: bold;
+  color: white;
+  transition: all 0.2s ease;
+}
+
+.primary-btn:hover {
+  transform: scale(1.03);
+  box-shadow: 0 10px 25px rgba(20, 184, 166, 0.2);
+}
+
+/* ======================
+   🔷 SESSION CARD
+====================== */
+.session-card {
+  background: rgba(255, 255, 255, 0.05);
+  padding: 16px;
+  border-radius: 14px;
+  display: flex;
+  justify-content: space-between;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.session-card:hover {
+  transform: scale(1.02);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+/* ======================
+   🔷 UTILITIES
+====================== */
+.glow {
+  box-shadow: 0 0 40px rgba(20, 184, 166, 0.3);
+}

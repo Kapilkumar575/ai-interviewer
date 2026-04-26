@@ -1,0 +1,37 @@
+# ======================
+# Node (Frontend + Backend)
+# ======================
+node_modules/
+dist/
+build/
+
+# ======================
+# Environment files
+# ======================
+.env
+.env.local
+.env.development
+.env.production
+
+# ======================
+# Python (AI Service)
+# ======================
+.venv/
+__pycache__/
+*.pyc
+
+# ======================
+# VS Code
+# ======================
+.vscode/
+
+# ======================
+# Logs
+# ======================
+*.log
+
+# ======================
+# OS files
+# ======================
+.DS_Store
+Thumbs.db
