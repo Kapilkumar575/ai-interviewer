@@ -33,23 +33,33 @@ app.use(
   })
 );
 
-// ================= CORS (FIXED) =================
+// ================= CORS (PRODUCTION READY) =================
 const allowedOrigins = [
   "http://localhost:5173",
   "http://localhost:5174",
+  process.env.FRONTEND_URL, // deployed frontend
 ];
 
 app.use(
   cors({
-    origin: allowedOrigins,
+    origin: function (origin, callback) {
+      // allow Postman / mobile apps (no origin)
+      if (!origin) return callback(null, true);
+
+      if (allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("❌ Not allowed by CORS"));
+      }
+    },
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
 
-// 🔥 VERY IMPORTANT (Preflight Fix)
-
+// ✅ PREFLIGHT FIX
+app.options("*", cors());
 
 // ================= BODY =================
 app.use(express.json());
@@ -58,7 +68,7 @@ app.use(express.urlencoded({ extended: true }));
 // ================= SOCKET.IO =================
 const io = new Server(server, {
   cors: {
-    origin: allowedOrigins,
+    origin: "*", // keep open for now (can restrict later)
     methods: ["GET", "POST"],
     credentials: true,
   },
