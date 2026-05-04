@@ -1,7 +1,7 @@
 import fetch from "node-fetch";
 
 const AI_SERVICE_URL =
-  process.env.AI_SERVICE_URL || "http://localhost:8000";
+  process.env.AI_SERVICE_URL || "https://ai-service-a85e.onrender.com";
 
 // ================= TIMEOUT + RETRY WRAPPER =================
 const fetchWithRetry = async (url, options, retries = 2) => {
