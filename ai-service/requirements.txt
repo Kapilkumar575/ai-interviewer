@@ -2,9 +2,5 @@
 fastapi
 uvicorn
 pydantic
+requests
 python-dotenv
-ollama
-openai-whisper 
-pydub 
-ffmpeg-python
-python-multipart
