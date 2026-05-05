@@ -84,7 +84,7 @@ const Login = () => {
 
           <div className='space-y-1'>
             <label className='text-[10px] font-bold uppercase text-gray-400 ml-1'>Email</label>
-            <input type="email" name="email" value={email} className='w-full p-3 transition-all border border-gray-200 outline-none bg-gray-50 rounded-xl focus:ring-2 focus:ring-teal-500 ' placeholder='siddhant@gmail.com' onChange={onChange} required />
+            <input type="email" name="email" value={email} className='w-full p-3 transition-all border border-gray-200 outline-none bg-gray-50 rounded-xl focus:ring-2 focus:ring-teal-500 ' placeholder='Enter your email' onChange={onChange} required />
 
           </div>
 

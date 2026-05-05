@@ -82,22 +82,22 @@ const Register = () => {
         <form onSubmit={onSubmit} className='grid grid-cols-1 gap-4'>
           <div className='space-y-1'>
             <label className='text-[10px] font-bold uppercase text-gray-400 ml-1'>Full Name</label>
-            <input type="text" name="name" value={name} className='w-full p-3 transition-all border border-gray-200 outline-none bg-gray-50 rounded-xl focus:ring-2 focus:ring-teal-500 ' placeholder='Siddhant Saxena' onChange={onChange} required />
+            <input type="text" name="name" value={name} className='w-full p-3 transition-all border border-gray-200 outline-none bg-gray-50 rounded-xl focus:ring-2 focus:ring-teal-500 ' placeholder='Enter your full name' onChange={onChange} required />
           </div>
           <div className='space-y-1'>
             <label className='text-[10px] font-bold uppercase text-gray-400 ml-1'>Email</label>
-            <input type="email" name="email" value={email} className='w-full p-3 transition-all border border-gray-200 outline-none bg-gray-50 rounded-xl focus:ring-2 focus:ring-teal-500 ' placeholder='siddhant@gmail.com' onChange={onChange} required />
+            <input type="email" name="email" value={email} className='w-full p-3 transition-all border border-gray-200 outline-none bg-gray-50 rounded-xl focus:ring-2 focus:ring-teal-500 ' placeholder='Enter your email' onChange={onChange} required />
 
           </div>
           <div className='grid grid-cols-1 gap-4 sm:grid-cols-2'>
             <div className='space-y-1'>
               <label className='text-[10px] font-bold uppercase text-gray-400 ml-1'>Password</label>
-              <input type="password" name="password" value={password} className='w-full p-3 transition-all border border-gray-200 outline-none bg-gray-50 rounded-xl focus:ring-2 focus:ring-teal-500 ' placeholder='********' onChange={onChange} required />
+              <input type="password" name="password" value={password} className='w-full p-3 transition-all border border-gray-200 outline-none bg-gray-50 rounded-xl focus:ring-2 focus:ring-teal-500 ' placeholder='Enter your password' onChange={onChange} required />
 
             </div>
             <div className='space-y-1'>
               <label className='text-[10px] font-bold uppercase text-gray-400 ml-1'>Confirm</label>
-              <input type="password" name="password2" value={password2} className='w-full p-3 transition-all border border-gray-200 outline-none bg-gray-50 rounded-xl focus:ring-2 focus:ring-teal-500 ' placeholder='********' onChange={onChange} required />
+              <input type="password" name="password2" value={password2} className='w-full p-3 transition-all border border-gray-200 outline-none bg-gray-50 rounded-xl focus:ring-2 focus:ring-teal-500 ' placeholder='Confirm your password' onChange={onChange} required />
             </div>
           </div>
           <button type="submit" className='w-full bg-teal-600 text-white p-3.5 rounded-xl font-bold hover:bg-teal-700 transition-all shadow-lg shadow-teal-100 mt-4 active:scale-[0.98]'>Create My Account</button>
