@@ -194,17 +194,23 @@ function InterviewRunner() {
   };
 
   const handleFinishInterview = () => {
-    if (!window.confirm("Are you sure you want to finish?")) return;
+  if (!window.confirm("Are you sure you want to finish?")) return;
 
-    dispatch(endSession(sessionId))
-      .unwrap()
-      .then(() => {
-        localStorage.removeItem(`drafts_${sessionId}`);
-        navigate(`/review/${sessionId}`);
-      })
-      .catch(err => toast.error("Could not finish session. Ai is working on it."));
-  };
+  dispatch(endSession(sessionId))
+    .unwrap()
+    .then(() => {
+      localStorage.removeItem(`drafts_${sessionId}`);
+      navigate(`/review/${sessionId}`);
+    })
+    .catch((error) => {
+      console.log("END SESSION ERROR:", error);
 
+      toast.error(
+        error?.message ||
+        "Could not finish interview"
+      );
+    });
+};
   if (!activeSession) return <div className="py-20 text-center text-slate-400">Loading...</div>;
 
   const currentDraft = drafts[currentQuestionIndex] || {};

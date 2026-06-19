@@ -323,12 +323,34 @@ const calculateOverallScore = async (sessionId) => {
 // @access  Private
 const endSession = asyncHandler(async (req, res) => {
     // ✅ FIX: Declare variables BEFORE using them in console.log
+    console.log("===== END SESSION START =====");
+    const endSession = asyncHandler(async (req, res) => {
+  try {
+
+    console.log("===== END SESSION START =====");
+
+    // existing code
+
+  } catch(error) {
+    console.error("END SESSION ERROR:", error);
+    throw error;
+  }
+});
     const sessionId = req.params.id;
     const userId = req.user._id;
 
     console.log("===== END SESSION API HIT =====");
     console.log("Session ID:", sessionId);
     console.log("User ID:", userId);
+    console.log("SESSION STATUS =", session.status);
+
+session.questions.forEach((q, i) => {
+  console.log(
+    `Q${i}`,
+    "submitted =", q.isSubmitted,
+    "evaluated =", q.isEvaluated
+  );
+});
 
     const session = await Session.findById(sessionId);
 

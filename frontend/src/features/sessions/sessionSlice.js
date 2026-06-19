@@ -174,10 +174,25 @@ export const sessionSlice = createSlice({
                 }
                 
             })
-            .addCase(submitAnswer.rejected, (state, action) => {
-                state.isError = true;
-                state.message = action.payload;
-            });
+           .addCase(submitAnswer.rejected, (state, action) => {
+    state.isError = true;
+    state.message = action.payload;
+})
+
+.addCase(endSession.pending, (state) => {
+    state.isLoading = true;
+})
+
+.addCase(endSession.fulfilled, (state, action) => {
+    state.isLoading = false;
+    state.activeSession = action.payload.session;
+})
+
+.addCase(endSession.rejected, (state, action) => {
+    state.isLoading = false;
+    state.isError = true;
+    state.message = action.payload;
+});
     }
 })
 

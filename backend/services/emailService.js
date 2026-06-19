@@ -2,6 +2,13 @@
 // ✅ Drop-in replacement — upgraded HTML email with full session details
 
 import nodemailer from "nodemailer";
+transporter.verify(function(error, success) {
+  if (error) {
+    console.log("EMAIL ERROR:", error);
+  } else {
+    console.log("EMAIL SERVER READY");
+  }
+});
 
 const transporter = nodemailer.createTransport({
   service: "gmail",
