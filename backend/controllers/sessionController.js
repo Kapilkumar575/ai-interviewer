@@ -336,7 +336,7 @@ const endSession = asyncHandler(async (req, res) => {
         res.status(404);
         throw new Error("Session not found or user unauthorized.");
     }
-
+/******** TEMPORARY FIX ********
     const isProcessing = session.questions.some(
         q => q.isSubmitted && !q.isEvaluated
     );
@@ -345,7 +345,7 @@ const endSession = asyncHandler(async (req, res) => {
         res.status(400);
         throw new Error("Cannot end interview while AI is processing answers.");
     }
-
+******************************/
     if (session.status === "completed") {
         res.status(400);
         throw new Error("Session is already completed.");
