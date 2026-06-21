@@ -1,21 +1,28 @@
 // backend/services/emailService.js
-// ✅ Drop-in replacement — upgraded HTML email with full session details
+// ✅ Upgraded HTML email with full session details & structural fixes
 
 import nodemailer from "nodemailer";
+
+// 1. Initialize the transporter instance first
+
+const transporter = nodemailer.createTransport({
+  host: "smtp.gmail.com",
+  port: 465,
+  secure: true,
+  auth: {
+    // .trim() removes spaces from the beginning and end of strings safely
+    user: (process.env.EMAIL_USER || "").trim(),
+    pass: (process.env.EMAIL_PASS || "").replace(/\s/g, ""),
+  },
+});
+
+// 2. Now verify the server connection safe from ReferenceErrors
 transporter.verify(function(error, success) {
   if (error) {
     console.log("EMAIL ERROR:", error);
   } else {
     console.log("EMAIL SERVER READY");
   }
-});
-
-const transporter = nodemailer.createTransport({
-  service: "gmail",
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: (process.env.EMAIL_PASS || "").replace(/\s/g, ""),
-  },
 });
 
 /**
@@ -32,6 +39,7 @@ const transporter = nodemailer.createTransport({
  * @param {string} sessionId      - MongoDB session ID (for deep link)
  */
 export const sendInterviewReport = async (
+  
   email,
   username,
   role,
@@ -106,14 +114,12 @@ export const sendInterviewReport = async (
 <body style="margin:0;padding:0;background:#0a0a0f;font-family:'Segoe UI',Arial,sans-serif;color:#e8e3d9;">
   <div style="max-width:640px;margin:0 auto;padding:32px 16px;">
 
-    <!-- Header -->
     <div style="background:linear-gradient(135deg,#12121e 0%,#0d0d18 100%);border-radius:20px 20px 0 0;border:1px solid #2a2a3e;border-bottom:none;padding:40px;text-align:center;">
       <p style="margin:0 0 16px;font-size:11px;letter-spacing:4px;text-transform:uppercase;color:#6366f1;font-weight:700;">AI Interviewer</p>
       <h1 style="margin:0;font-size:26px;font-weight:300;color:#f0ebe0;line-height:1.3;">Interview Complete</h1>
       <p style="margin:10px 0 0;color:#6b6478;font-size:13px;">${username} &nbsp;·&nbsp; ${role}${level ? ` (${level})` : ""} &nbsp;·&nbsp; ${date}</p>
     </div>
 
-    <!-- Score Card -->
     <div style="background:#0d0d18;border:1px solid #2a2a3e;border-top:none;border-bottom:none;padding:40px;text-align:center;">
       <div style="display:inline-block;width:110px;height:110px;border-radius:50%;border:3px solid ${scoreColor};line-height:1;padding-top:22px;box-sizing:border-box;margin-bottom:12px;">
         <div style="font-size:38px;font-weight:700;color:${scoreColor};">${overallScore}</div>
@@ -121,7 +127,6 @@ export const sendInterviewReport = async (
       </div>
       <div style="font-size:15px;color:#c9c2b4;letter-spacing:1px;margin-bottom:24px;">${scoreLabel}</div>
 
-      <!-- Sub-scores -->
       <table style="width:100%;max-width:360px;margin:0 auto;border-collapse:collapse;">
         <tr>
           <td style="text-align:center;padding:0 12px;">
@@ -140,7 +145,6 @@ export const sendInterviewReport = async (
       </table>
     </div>
 
-    <!-- Question Breakdown -->
     ${
       questionRows
         ? `
@@ -163,13 +167,11 @@ export const sendInterviewReport = async (
         : ""
     }
 
-    <!-- CTA -->
     <div style="background:#0d0d18;border:1px solid #2a2a3e;border-top:none;border-bottom:none;padding:32px 40px;text-align:center;">
       <p style="margin:0 0 20px;color:#8b8499;font-size:14px;line-height:1.6;">View your full detailed report with ideal answers and AI feedback.</p>
       <a href="${reviewLink}" style="display:inline-block;padding:14px 36px;background:#6366f1;color:#ffffff;text-decoration:none;border-radius:100px;font-size:14px;font-weight:700;letter-spacing:0.5px;">View Full Report →</a>
     </div>
 
-    <!-- Footer -->
     <div style="background:#080810;border:1px solid #2a2a3e;border-top:none;border-radius:0 0 20px 20px;padding:24px 40px;text-align:center;">
       <p style="margin:0;font-size:11px;color:#3a3448;line-height:1.7;">
         You're receiving this because you completed an interview on 

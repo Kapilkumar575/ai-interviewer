@@ -107,7 +107,9 @@ function InterviewRunner() {
   // 4. Show "Analyzing..." status if Locked AND not yet evaluated
   const isProcessing = isQuestionLocked && !currentQuestion?.isEvaluated;
 
-
+const hasPendingEvaluation = activeSession?.questions?.some(
+  (q, i) => (q.isSubmitted || submittedLocal[i]) && !q.isEvaluated
+);
   const handleNavigation = (index) => {
     if (index >= 0 && index < activeSession?.questions.length) {
       if (isRecording) stopRecording();
@@ -233,13 +235,13 @@ function InterviewRunner() {
             ))}
           </div>
         </div>
-        <button
-          onClick={handleFinishInterview}
-          disabled={isLoading}
-          className="px-6 py-2 font-bold text-white bg-rose-600 rounded-xl hover:bg-rose-700 disabled:opacity-50"
-        >
-          {isLoading ? "Finalizing..." : "Finish Interview"}
-        </button>
+       <button
+  onClick={handleFinishInterview}
+  disabled={isLoading || hasPendingEvaluation}
+  className="px-6 py-2 font-bold text-white bg-rose-600 rounded-xl hover:bg-rose-700 disabled:opacity-50"
+>
+  {hasPendingEvaluation ? "Waiting for AI..." : isLoading ? "Finalizing..." : "Finish Interview"}
+</button>
       </div>
 
       <div className="p-8 mb-6 text-white shadow-xl bg-slate-900 rounded-3xl">

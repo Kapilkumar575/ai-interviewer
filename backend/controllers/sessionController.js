@@ -1,5 +1,4 @@
 // backend/controllers/sessionController.js
-// ✅ FIXED endSession — variables declared before use, email integration confirmed working
 
 import { sendInterviewReport } from "../services/emailService.js";
 import User from "../models/userModel.js";
@@ -78,7 +77,7 @@ const createSession = asyncHandler(async (req, res) => {
                 questionType: index < codingCount ? 'coding' : 'oral',
                 isEvaluated: false,
                 isSubmitted: false,
-            }));
+                }));
 
             session.questions = questionsArray;
             session.status = 'in-progress';
@@ -241,9 +240,9 @@ const evaluateAnswerAsync = async (io, userId, sessionId, questionIndex, audioFi
 // @access  Private
 const submitAnswer = asyncHandler(async (req, res) => {
     console.log("========== SUBMIT ANSWER ==========");
-console.log("BODY:", req.body);
-console.log("FILE:", req.file);
-console.log("USER:", req.user);
+    console.log("BODY:", req.body);
+    console.log("FILE:", req.file);
+    console.log("USER:", req.user);
     const sessionId = req.params.id;
     const { questionIndex, code } = req.body;
     const userId = req.user._id;
@@ -260,8 +259,8 @@ console.log("USER:", req.user);
    
     const question = session.questions[questionIdx];
     console.log("questionIndex =", questionIndex);
-console.log("parsed =", questionIdx);
-console.log("questions count =", session.questions.length);
+    console.log("parsed =", questionIdx);
+    console.log("questions count =", session.questions.length);
 
     if (!question) {
         res.status(400);
@@ -269,13 +268,13 @@ console.log("questions count =", session.questions.length);
     }
 
     let audioFilePath = null;
-  if (req.file) {
-    console.log("Audio received");
-    console.log(req.file);
+    if (req.file) {
+        console.log("Audio received");
+        console.log(req.file);
 
-    audioFilePath = req.file.path;
-    console.log("audioFilePath =", audioFilePath);
-}
+        audioFilePath = req.file.path;
+        console.log("audioFilePath =", audioFilePath);
+    }
     const codeSubmission = code || null;
 
     question.isSubmitted = true;
@@ -322,35 +321,8 @@ const calculateOverallScore = async (sessionId) => {
 // @route   POST /api/sessions/:id/end
 // @access  Private
 const endSession = asyncHandler(async (req, res) => {
-    // ✅ FIX: Declare variables BEFORE using them in console.log
-    console.log("===== END SESSION START =====");
-    const endSession = asyncHandler(async (req, res) => {
-  try {
-
-    console.log("===== END SESSION START =====");
-
-    // existing code
-
-  } catch(error) {
-    console.error("END SESSION ERROR:", error);
-    throw error;
-  }
-});
     const sessionId = req.params.id;
     const userId = req.user._id;
-
-    console.log("===== END SESSION API HIT =====");
-    console.log("Session ID:", sessionId);
-    console.log("User ID:", userId);
-    console.log("SESSION STATUS =", session.status);
-
-session.questions.forEach((q, i) => {
-  console.log(
-    `Q${i}`,
-    "submitted =", q.isSubmitted,
-    "evaluated =", q.isEvaluated
-  );
-});
 
     const session = await Session.findById(sessionId);
 
@@ -358,54 +330,58 @@ session.questions.forEach((q, i) => {
         res.status(404);
         throw new Error("Session not found or user unauthorized.");
     }
-/******** TEMPORARY FIX ********
-    const isProcessing = session.questions.some(
-        q => q.isSubmitted && !q.isEvaluated
+
+    // If it's already completed (e.g. evaluateAnswerAsync finished and
+    // marked it completed right before this request landed), don't error —
+    // just return the current state.
+    if (session.status === "completed") {
+        return res.json({
+            message: "Session already completed.",
+            session,
+        });
+    }
+
+    let scoreSummary;
+    try {
+        scoreSummary = await calculateOverallScore(sessionId);
+    } catch (err) {
+        console.error("calculateOverallScore failed:", err);
+        scoreSummary = { overallScore: 0, avgTechnical: 0, avgConfidence: 0 };
+    }
+
+    // Atomic update — avoids racing with evaluateAnswerAsync's own session.save()
+    const updatedSession = await Session.findByIdAndUpdate(
+        sessionId,
+        {
+            $set: {
+                overallScore: scoreSummary.overallScore || 0,
+                status: "completed",
+                endTime: new Date(),
+                metrics: {
+                    avgTechnical: scoreSummary.avgTechnical,
+                    avgConfidence: scoreSummary.avgConfidence,
+                },
+            },
+        },
+        { new: true }
     );
 
-    if (isProcessing) {
-        res.status(400);
-        throw new Error("Cannot end interview while AI is processing answers.");
-    }
-******************************/
-    if (session.status === "completed") {
-        res.status(400);
-        throw new Error("Session is already completed.");
-    }
-
-    const scoreSummary = await calculateOverallScore(sessionId);
-
-    session.overallScore = scoreSummary.overallScore || 0;
-    session.status = "completed";
-    session.endTime = new Date();
-    session.metrics = {
-        avgTechnical: scoreSummary.avgTechnical,
-        avgConfidence: scoreSummary.avgConfidence,
-    };
-
-    await session.save();
-
-    // ✅ EMAIL: Send interview report to user
     try {
         const user = await User.findById(userId);
-        console.log("User found:", user?.email);
-
         if (user?.email) {
             await sendInterviewReport(
                 user.email,
                 user.name,
-                session.role,
-                session.level,
-                session.overallScore,
+                updatedSession.role,
+                updatedSession.level,
+                updatedSession.overallScore,
                 scoreSummary.avgTechnical,
                 scoreSummary.avgConfidence,
-                session.questions,
-                session._id
+                updatedSession.questions,
+                updatedSession._id
             );
-            console.log("✅ Interview report email sent to:", user.email);
         }
     } catch (emailError) {
-        // ⚠️ Non-fatal: log but don't crash the response
         console.error("❌ Email sending failed:", emailError.message);
     }
 
@@ -417,15 +393,14 @@ session.questions.forEach((q, i) => {
         sessionId,
         "SESSION_COMPLETED",
         "Interview session ended successfully.",
-        session
+        updatedSession
     );
 
     res.json({
         message: "Session ended successfully.",
-        session,
+        session: updatedSession,
     });
 });
-
 export {
     createSession,
     getSessionById,

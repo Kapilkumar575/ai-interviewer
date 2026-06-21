@@ -1,6 +1,8 @@
+import "dotenv/config";
 import express from "express";
 import http from "http";
 import dotenv from "dotenv";
+import { sendInterviewReport } from "./services/emailService.js"; 
 import cors from "cors";
 import helmet from "helmet";
 import morgan from "morgan";
@@ -14,6 +16,8 @@ import { notFound, errorHandler } from "./middleware/errorMiddleware.js";
 
 // ================= INIT =================
 dotenv.config();
+console.log("EMAIL_USER =", process.env.EMAIL_USER);
+console.log("EMAIL_PASS =", process.env.EMAIL_PASS ? "FOUND" : "MISSING");
 connectDB();
 
 const app = express();
