@@ -239,16 +239,11 @@ const evaluateAnswerAsync = async (io, userId, sessionId, questionIndex, audioFi
 // @route   POST /api/sessions/:id/submit-answer
 // @access  Private
 const submitAnswer = asyncHandler(async (req, res) => {
-    console.log("========== SUBMIT ANSWER ==========");
-    console.log("BODY:", req.body);
-    console.log("FILE:", req.file);
-    console.log("USER:", req.user);
     const sessionId = req.params.id;
     const { questionIndex, code } = req.body;
     const userId = req.user._id;
 
     const session = await Session.findById(sessionId);
-    console.log("SESSION FOUND:", !!session);
 
     if (!session || session.user.toString() !== userId.toString()) {
         res.status(404);
@@ -256,11 +251,8 @@ const submitAnswer = asyncHandler(async (req, res) => {
     }
 
     const questionIdx = parseInt(questionIndex, 10);
-   
+
     const question = session.questions[questionIdx];
-    console.log("questionIndex =", questionIndex);
-    console.log("parsed =", questionIdx);
-    console.log("questions count =", session.questions.length);
 
     if (!question) {
         res.status(400);
@@ -269,11 +261,7 @@ const submitAnswer = asyncHandler(async (req, res) => {
 
     let audioFilePath = null;
     if (req.file) {
-        console.log("Audio received");
-        console.log(req.file);
-
         audioFilePath = req.file.path;
-        console.log("audioFilePath =", audioFilePath);
     }
     const codeSubmission = code || null;
 
@@ -366,25 +354,6 @@ const endSession = asyncHandler(async (req, res) => {
         { new: true }
     );
 
-    try {
-        const user = await User.findById(userId);
-        if (user?.email) {
-            await sendInterviewReport(
-                user.email,
-                user.name,
-                updatedSession.role,
-                updatedSession.level,
-                updatedSession.overallScore,
-                scoreSummary.avgTechnical,
-                scoreSummary.avgConfidence,
-                updatedSession.questions,
-                updatedSession._id
-            );
-        }
-    } catch (emailError) {
-        console.error("❌ Email sending failed:", emailError.message);
-    }
-
     const io = req.app.get("io");
 
     pushSocketUpdate(
@@ -396,10 +365,37 @@ const endSession = asyncHandler(async (req, res) => {
         updatedSession
     );
 
+    // ✅ Respond to the client immediately. Do NOT await the email here —
+    // Gmail SMTP from Render can hang for 60-120s, which was making
+    // "Finish Interview" take two minutes and (since it was wrapped in
+    // try/catch) silently failing without telling anyone.
     res.json({
         message: "Session ended successfully.",
         session: updatedSession,
     });
+
+    // 🔥 Fire-and-forget: runs after the response has already gone out.
+    User.findById(userId)
+        .then((user) => {
+            if (!user?.email) return;
+            return sendInterviewReport(
+                user.email,
+                user.name,
+                updatedSession.role,
+                updatedSession.level,
+                updatedSession.overallScore,
+                scoreSummary.avgTechnical,
+                scoreSummary.avgConfidence,
+                updatedSession.questions,
+                updatedSession._id
+            );
+        })
+        .then(() => {
+            console.log(`📧 Report email dispatched for session ${sessionId}`);
+        })
+        .catch((emailError) => {
+            console.error("❌ Email sending failed:", emailError);
+        });
 });
 export {
     createSession,
