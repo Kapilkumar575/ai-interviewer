@@ -4,7 +4,6 @@
 import nodemailer from "nodemailer";
 
 // 1. Initialize the transporter instance first
-
 const transporter = nodemailer.createTransport({
   host: "smtp.gmail.com",
   port: 465,
@@ -16,14 +15,22 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-// 2. Now verify the server connection safe from ReferenceErrors
-transporter.verify(function(error, success) {
-  if (error) {
-    console.log("EMAIL ERROR:", error);
-  } else {
-    console.log("EMAIL SERVER READY");
-  }
-});
+/**
+ * Verify the SMTP connection. Call this explicitly from server.js
+ * AFTER the module has fully loaded — never run verify() as a
+ * top-level side effect, since that's what causes the
+ * "Cannot access 'transporter' before initialization" crash
+ * if this module gets re-entered (e.g. via a circular import).
+ */
+export const verifyEmailTransport = () => {
+  transporter.verify((error, success) => {
+    if (error) {
+      console.log("EMAIL ERROR:", error);
+    } else {
+      console.log("EMAIL SERVER READY");
+    }
+  });
+};
 
 /**
  * Send a rich interview report email after a session ends.
@@ -39,7 +46,6 @@ transporter.verify(function(error, success) {
  * @param {string} sessionId      - MongoDB session ID (for deep link)
  */
 export const sendInterviewReport = async (
-  
   email,
   username,
   role,
@@ -184,13 +190,21 @@ export const sendInterviewReport = async (
 </body>
 </html>`;
 
-  const info = await transporter.sendMail({
-    from: `"AI Interviewer" <${process.env.EMAIL_USER}>`,
-    to: email,
-    subject: `Your Interview Report — ${role} · ${overallScore}/100 (${scoreLabel})`,
-    html,
-  });
+  try {
+    const info = await transporter.sendMail({
+      from: `"AI Interviewer" <${process.env.EMAIL_USER}>`,
+      to: email,
+      subject: `Your Interview Report — ${role} · ${overallScore}/100 (${scoreLabel})`,
+      html,
+    });
 
-  console.log("✅ Email sent:", info.messageId);
-  return info;
+    console.log("✅ Email sent:", info.messageId);
+    return info;
+  } catch (err) {
+    // IMPORTANT: don't let an email failure crash/abort the
+    // "finish interview" flow. Log it and return null so the
+    // caller can still mark the session complete.
+    console.error("❌ Failed to send interview report email:", err);
+    return null;
+  }
 };
